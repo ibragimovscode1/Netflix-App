@@ -9,15 +9,20 @@ import UIKit
 
 class SearchViewController: UIViewController {
     //MARK: - Properties
+    
     //MARK: - Lifecycle
-    //MARK: - Helpers
-    //MARK: - Selectors
-
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        title = "Search"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationItem.largeTitleDisplayMode = .always
+        
         view.backgroundColor = .systemBackground
     }
+    //MARK: - Helpers
+    
+    
+    //MARK: - Selectors
     
 
 }
