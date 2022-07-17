@@ -24,17 +24,32 @@ class DownloadsViewController: UIViewController {
         title = "Downloads"
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationItem.largeTitleDisplayMode = .always
+        view.addSubview(downloadedTable)
         downloadedTable.delegate = self
         downloadedTable.dataSource = self
+        fetchLocalStorageForDownload()
     }
     //MARK: - Helpers
    
     private func fetchLocalStorageForDownload() {
-        DataPersistenceManager.shared.fetchingTitlesFromDatabase { result in
+        DataPersistenceManager.shared.fetchingTitlesFromDatabase { [weak self] result in
             switch result {
-                
+            case .success(let titles):
+                self?.titles = titles
+                DispatchQueue.main.async {
+              
+                    self?.downloadedTable.reloadData()
+                }
+               
+            case .failure(let error):
+                print(error.localizedDescription)
             }
         }
+        
+    }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        downloadedTable.frame = view.bounds
     }
     
     //MARK: - Selectors
@@ -57,4 +72,24 @@ extension DownloadsViewController: UITableViewDelegate, UITableViewDataSource {
         return 150
         
     }
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        switch editingStyle {
+        case .delete:
+           DataPersistenceManager.shared.deleteTitleWith(model: titles[indexPath.row]) {[weak self] result in
+                switch result {
+                case .success():
+                    print("Deleted movie")
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+               self?.titles.remove(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: .fade)
+               
+            }
+        default:
+            break
+            
+        }
+    }
+    
 }
